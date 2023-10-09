@@ -1,0 +1,10 @@
+Dockerfile
+README.md
+.env
+
+# Python Related Ignores
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache

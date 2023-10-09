@@ -1,0 +1,5 @@
+Flask
+gunicorn
+twilio
+python-dotenv
+google-cloud-firestore
