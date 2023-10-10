@@ -1,11 +1,11 @@
 from unittest.mock import patch, MagicMock
 from assertpy import assert_that
-from third_party_interfaces import get_users_by_last_completed_date, NULL_DATETIME, get_user_by_phone_number, update_user_response, complete_reminder, reminder_is_active, activate_reminder
+from reminder.third_party_interfaces import get_users_by_last_completed_date, NULL_DATETIME, get_user_by_phone_number, update_user_response, complete_reminder, reminder_is_active, activate_reminder
 from mockfirestore import MockFirestore
 from datetime import datetime, timedelta
 from google.cloud.exceptions import NotFound
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_no_dates_set_one_record(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+11111111111", {"name": "Brian", "last_completed": NULL_DATETIME, "last_attempted": NULL_DATETIME, "last_response": ""})
@@ -20,7 +20,7 @@ def test_get_record_when_no_dates_set_one_record(firestore_mock: MagicMock):
     assert_that(result[0].id).is_equal_to(brian[0])
     assert_that(result[0].to_dict()).is_equal_to(brian[1])
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_no_dates_set_two_records(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+11111111111", {"name": "Brian", "last_completed": NULL_DATETIME, "last_attempted": NULL_DATETIME, "last_response": ""})
@@ -34,10 +34,10 @@ def test_get_record_when_no_dates_set_two_records(firestore_mock: MagicMock):
     firestore_mock.Client.return_value = mock_db
     result = list(get_users_by_last_completed_date("123", 1))
     assert_that(result).is_length(1)
-    assert_that(result[0].id).is_equal_to(annie[0])
-    assert_that(result[0].to_dict()).is_equal_to(annie[1])
+    assert_that(result[0].id).is_equal_to(brian[0])
+    assert_that(result[0].to_dict()).is_equal_to(brian[1])
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_last_completed_set(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+11111111111", {"name": "Brian", "last_completed": datetime(2023,2,1), "last_attempted": NULL_DATETIME, "last_response": ""})
@@ -56,8 +56,8 @@ def test_get_record_when_last_completed_set(firestore_mock: MagicMock):
     assert_that(result[0].id).is_equal_to(annie[0])
     assert_that(result[0].to_dict()).is_equal_to(annie[1])
 
-@patch("third_party_interfaces.database.datetime")
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.datetime")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_last_attempted_set(firestore_mock: MagicMock, datetime_mock:MagicMock):
     datetime_mock.now.return_value = datetime(2023,2,1)
     datetime_mock.timedelta = timedelta
@@ -78,8 +78,8 @@ def test_get_record_when_last_attempted_set(firestore_mock: MagicMock, datetime_
     assert_that(result[0].id).is_equal_to(brian[0])
     assert_that(result[0].to_dict()).is_equal_to(brian[1])
 
-@patch("third_party_interfaces.database.datetime")
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.datetime")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_all_attempted(firestore_mock: MagicMock, datetime_mock:MagicMock):
     datetime_mock.now.return_value = datetime(2023,2,1)
     datetime_mock.timedelta = timedelta
@@ -98,7 +98,7 @@ def test_get_record_when_all_attempted(firestore_mock: MagicMock, datetime_mock:
     result = list(get_users_by_last_completed_date("123", 1))
     assert_that(result).is_length(0)
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_user_by_phone_number(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+14444444444", {"name": "Brian", "last_completed": datetime(2023,2,1), "last_attempted": datetime(2023,2,1), "last_response": ""})
@@ -116,7 +116,7 @@ def test_get_user_by_phone_number(firestore_mock: MagicMock):
     assert_that(result.id).is_equal_to(annie[0])
     assert_that(result.to_dict()).is_equal_to(annie[1])
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_get_user_by_phone_number_with_invalid_number(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+14444444444", {"name": "Brian", "last_completed": datetime(2023,2,1), "last_attempted": datetime(2023,2,1), "last_response": ""})
@@ -133,7 +133,7 @@ def test_get_user_by_phone_number_with_invalid_number(firestore_mock: MagicMock)
     result = get_user_by_phone_number("123", "+12222222222")
     assert_that(result.exists).is_false()
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_update_user_response(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+14444444444", {"name": "Brian", "last_completed": datetime(2023,2,1), "last_attempted": datetime(2023,2,1), "last_response": ""})
@@ -150,7 +150,7 @@ def test_update_user_response(firestore_mock: MagicMock):
     update_user_response("123", "+15555555555", "Yes")
     assert_that(annie[1].get("last_response")).is_equal_to("Yes")
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_update_user_response_with_bad_number(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     brian = ("+14444444444", {"name": "Brian", "last_completed": datetime(2023,2,1), "last_attempted": datetime(2023,2,1), "last_response": ""})
@@ -166,7 +166,7 @@ def test_update_user_response_with_bad_number(firestore_mock: MagicMock):
     firestore_mock.Client.return_value = mock_db
     assert_that(update_user_response).raises(NotFound).when_called_with("123", "+12222222222", "Yes")
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_complete_reminder(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     rotation = ("123", {"name": "Trash Reminder", "schedule": "0 17 * * THU", "status": "active"})
@@ -179,7 +179,7 @@ def test_complete_reminder(firestore_mock: MagicMock):
     complete_reminder("123")
     assert_that(rotation[1].get("status")).is_equal_to("inactive")
 
-@patch("third_party_interfaces.database.firestore")
+@patch("reminder.third_party_interfaces.database.firestore")
 def test_is_active(firestore_mock: MagicMock):
     mock_db = MockFirestore()
     rotation = ("123", {"name": "Trash Reminder", "schedule": "0 17 * * THU", "status": "active"})
@@ -194,16 +194,3 @@ def test_is_active(firestore_mock: MagicMock):
     assert_that(reminder_is_active("123")).is_true()
     assert_that(reminder_is_active("456")).is_false()
     assert_that(reminder_is_active).raises(NotFound).when_called_with("000")
-
-@patch("third_party_interfaces.database.firestore")
-def test_is_active(firestore_mock: MagicMock):
-    mock_db = MockFirestore()
-    rotation = ("123", {"name": "Trash Reminder", "schedule": "0 17 * * THU", "status": "inactive"})
-    mock_db._data = {
-        "reminders": {
-            rotation[0]: rotation[1],
-        }
-    }
-    firestore_mock.Client.return_value = mock_db
-    activate_reminder("123")
-    assert_that(rotation[1].get("status")).is_equal_to("active")

@@ -1,8 +1,8 @@
 from unittest.mock import patch, MagicMock, call
 from assertpy import assert_that
-from third_party_interfaces import send_sms
+from reminder.third_party_interfaces import send_sms
 
-@patch("third_party_interfaces.twilio_client.Client")
+@patch("reminder.third_party_interfaces.twilio_client.Client")
 def test_send_sms(client:MagicMock):
     from_number = '+19999999999'
     to_number = "+12222222222"
