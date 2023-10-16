@@ -1,17 +1,28 @@
-from reminder import Rotation
+"""
+test_rotation is the test suite for the Rotation class
+"""
 from unittest.mock import patch, MagicMock, call
-from assertpy import assert_that
 from itertools import islice
+from assertpy import assert_that
+from reminder import Rotation
 
 @patch("reminder.rotation.get_data")
 def test_rotation_test(p: MagicMock):
+	"""
+	This is a test for the rotation_test function
+	"""
 	p.return_value = "123"
 	rotation = Rotation()
 	assert rotation.rotation_test() == "123"
 
 @patch("reminder.rotation.send_sms")
 @patch("reminder.rotation.get_users_by_last_completed_date")
-def test_send_reminder_with_no_users_throws_exception(get_users_mock: MagicMock, send_sms_mock:MagicMock):
+def test_send_reminder_with_no_users_throws_exception(get_users_mock: MagicMock, 
+													  send_sms_mock:MagicMock):
+	"""
+	This test ensures that if a key is sent in that does not match a user,
+	the proper error is thrown by the application
+	"""
 	get_users_mock.return_value = islice([],0)
 	rotation = Rotation()
 	assert_that(rotation.send_reminder).raises(KeyError).when_called_with("123")\
@@ -22,9 +33,12 @@ def test_send_reminder_with_no_users_throws_exception(get_users_mock: MagicMock,
 @patch("reminder.rotation.send_sms")
 @patch("reminder.rotation.get_users_by_last_completed_date")
 def test_send_reminder(get_users_mock: MagicMock, send_sms_mock:MagicMock):
+	"""
+	This tests the send_reminder function
+	"""
 	phone_number = "+12222222222"
 	name = "Brian"
-	message = f"Hi {name}, it's your turn to take out the trash tonight! Can you pick it up tonight? Please respond with Yes or No." 
+	message = f"Hi {name}, it's your turn to take out the trash tonight! Can you pick it up tonight? Please respond with Yes or No."
 	user_record = MagicMock()
 	user_record.id = phone_number
 	user_record.to_dict.return_value = { "name": name, }
@@ -38,7 +52,15 @@ def test_send_reminder(get_users_mock: MagicMock, send_sms_mock:MagicMock):
 @patch("reminder.rotation.update_user_response")
 @patch("reminder.rotation.get_user_by_phone_number")
 @patch("reminder.rotation.send_sms")
-def test_recieve_positive_response(send_sms:MagicMock, get_user_by_phone_number:MagicMock, update_user_response:MagicMock, complete_reminder:MagicMock, reminder_is_active:MagicMock):
+def test_recieve_positive_response(send_sms:MagicMock, 
+								   get_user_by_phone_number:MagicMock, 
+								   update_user_response:MagicMock, 
+								   complete_reminder:MagicMock, 
+								   reminder_is_active:MagicMock):
+	"""
+	This test verifies that the application responds correctly 
+	when it receives a "YES" response.
+	"""
 	phone_number = "+5551234567"
 	collection = "123"
 	message_body = "YES"
@@ -71,7 +93,15 @@ def test_recieve_from_non_user(get_user_by_phone_number:MagicMock):
 @patch("reminder.rotation.update_user_response")
 @patch("reminder.rotation.get_user_by_phone_number")
 @patch("reminder.rotation.send_sms")
-def test_recieve_non_valid_response(send_sms:MagicMock, get_user_by_phone_number:MagicMock, update_user_response:MagicMock, complete_reminder:MagicMock, reminder_is_active:MagicMock):
+def test_recieve_non_valid_response(send_sms:MagicMock, 
+									get_user_by_phone_number:MagicMock, 
+									update_user_response:MagicMock, 
+									complete_reminder:MagicMock, 
+									reminder_is_active:MagicMock):
+	"""
+	This tests that the recieve function responds correctly to 
+	an invalid response from the user.
+	"""
 	phone_number = "+5551234567"
 	collection = "123"
 	message_body = "BLAH"
@@ -93,7 +123,16 @@ def test_recieve_non_valid_response(send_sms:MagicMock, get_user_by_phone_number
 @patch("reminder.rotation.update_user_response")
 @patch("reminder.rotation.get_user_by_phone_number")
 @patch("reminder.rotation.send_sms")
-def test_recieve_completed_reminder(send_sms:MagicMock, get_user_by_phone_number:MagicMock, update_user_response:MagicMock, complete_reminder:MagicMock, reminder_is_active:MagicMock):
+def test_recieve_completed_reminder(send_sms:MagicMock, 
+									get_user_by_phone_number:MagicMock, 
+									update_user_response:MagicMock, 
+									complete_reminder:MagicMock, 
+									reminder_is_active:MagicMock):
+	"""
+	This test makes sure the application responds correctly when
+	the recieve function recieves confirmation from the user
+	that the task has been completed.
+	"""
 	phone_number = "+5551234567"
 	collection = "123"
 	message_body = "Yes"
@@ -116,8 +155,17 @@ def test_recieve_completed_reminder(send_sms:MagicMock, get_user_by_phone_number
 @patch("reminder.rotation.update_user_response")
 @patch("reminder.rotation.get_user_by_phone_number")
 @patch("reminder.rotation.send_sms")
-def test_recieve_negative_response(send_sms:MagicMock, get_user_by_phone_number:MagicMock, update_user_response:MagicMock, complete_reminder:MagicMock, reminder_is_active:MagicMock, get_users_by_last_completed:MagicMock):
-	next_message = f"Hi Other, it's your turn to take out the trash tonight! Can you pick it up tonight? Please respond with Yes or No." 
+def test_recieve_negative_response(send_sms:MagicMock, 
+								   get_user_by_phone_number:MagicMock, 
+								   update_user_response:MagicMock, 
+								   complete_reminder:MagicMock, 
+								   reminder_is_active:MagicMock, 
+								   get_users_by_last_completed:MagicMock):
+	"""
+	This test verifies that the receive function responds correctly when
+	it receives a "no" response from the user.
+	"""
+	next_message = "Hi Other, it's your turn to take out the trash tonight! Can you pick it up tonight? Please respond with Yes or No."
 	message = "Got it! Thanks!"
 	phone_number = "+5551234567"
 	next_phone_number = "+4441234567"
