@@ -6,15 +6,56 @@ This is the main flask program. Eventually, this should just call
 other modules and handle errors only.
 """
 from os import environ
-from flask import Flask, request, Response
+from json import loads
+import logging
+
+from flask import Flask, request, Response, send_from_directory
 from dotenv import load_dotenv
-from reminder import Rotation
 from twilio.request_validator import RequestValidator
-from google.auth.jwt import decode
-from google.auth.exceptions import InvalidValue, MalformedError
+from google.auth.exceptions import GoogleAuthError
+from google.cloud.logging import Client
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
+from . import Rotation
 
 app = Flask(__name__)
 load_dotenv()
+
+if environ.get("CLOUD_LOGGING", "False") == "True":
+    client = Client()
+    client.setup_logging()
+
+def authenticate(bearer_token:str, base_url:str) -> bool:
+    """
+    Authenticate google oauth2 token
+    """
+    try:
+        token = bearer_token.split(" ")[1]
+
+        # Verify and decode the JWT. `verify_oauth2_token` verifies
+        claim = id_token.verify_oauth2_token(
+            token, requests.Request()
+        )
+
+        if claim['aud'] !=  base_url.replace("http://", "https://", 1):
+            return False
+
+        if claim['email'] !=  environ.get('PUBSUB_USER') or \
+            not claim['email_verified']:
+            return False
+
+    except (GoogleAuthError, ValueError):
+        return False
+
+    return True
+
+@app.route("/opt-in", methods=["GET"])
+def opt_in() -> Response:
+    """
+    Send opt-in image for 10DL compliance
+    """
+    return send_from_directory("files", "opt-in.png")
 
 @app.route("/", methods=["GET"])
 def test() -> Response:
@@ -29,27 +70,30 @@ def send_reminders() -> Response:
     Call this from pub/sub subscription
     pass reminder key
     '''
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
+    if not authenticate(request.headers.get("Authorization"), request.base_url):
         return "Unauthorized", 401
 
-    # split the auth type and value from the header.
-    auth_type, creds = auth_header.split(" ", 1)
-    if auth_type.lower() != "bearer":
-        return "Unauthorized", 401
+    payload = loads(request.data.decode("utf-8"))
+    message:dict = payload.get("message", {})
+    attributes:dict = message.get("attributes", {})
 
-    try:
-        decode(creds)
-    except (InvalidValue, MalformedError):
-        return "Unauthorized", 401
+    collection = attributes.get("collection")
+    status = attributes.get("status")
 
-    reminder = request.json.get("reminder")
-    rotation = Rotation()
-    rotation.send_reminder(reminder)
-    return {}
+    rotation = Rotation(collection, status)
+    logging.info("Sending rotation reminders")
+    logging.info("Sending rotation: %s", collection)
+    rotation.send_reminder(collection)
+
+    logging.warning(request.data.decode("utf-8"))
+    # Returning any 2xx status indicates successful receipt of the message.
+    return "OK", 200
 
 @app.route("/receive_sms", methods=["POST"])
 def receive_sms() -> Response:
+    """
+    Recieve sms from twilio service
+    """
     auth_token = environ['TWILIO_AUTH_TOKEN']
     # url is incorrectly being set to http causing validator to fail
     https_url = f"https{request.url[4:]}"
@@ -65,13 +109,11 @@ def receive_sms() -> Response:
     phone_number = request.form['From']
     message_body = request.form['Body']
 
-    # TODO: Can we get collection from From or To?
-    # For now hardcode to single collection
     collection = "trash-reminder"
 
-    rotation = Rotation()
+    rotation = Rotation(collection)
     rotation.receive(collection, phone_number, message_body)
-    
+
     return {}
 
 

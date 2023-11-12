@@ -1,5 +1,8 @@
 {
 	"python.testing.unittestEnabled": false,
 	"python.testing.pytestEnabled": true,
-	"editor.insertSpaces": true
+	"editor.insertSpaces": true,
+	"python.testing.pytestArgs": [
+		"."
+	]
 }
