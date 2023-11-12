@@ -15,9 +15,13 @@ from google.auth.exceptions import InvalidValue, MalformedError
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from json import loads
+from google.cloud.logging import Client
+import logging
 
 app = Flask(__name__)
 load_dotenv()
+client = Client()
+client.setup_logging()
 
 @app.route("/", methods=["GET"])
 def test() -> Response:
@@ -33,6 +37,7 @@ def send_reminders() -> Response:
     pass reminder key
     '''
     # Verify that the request originates from the application.
+    logging.warning(request.args.get("token", ""))
     #if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
     #    return "Invalid request", 400
 
