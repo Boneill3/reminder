@@ -14,7 +14,7 @@ RUN useradd -ms /bin/bash web
 USER web
 WORKDIR /home/web
 ENV PATH="/home/web/.local/bin:${PATH}"
-COPY --chown=web:web ./reminder .
+COPY --chown=web:web . .
 
 # Install production dependencies.
 RUN pip install --upgrade pip
@@ -25,4 +25,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # For environments with multiple CPU cores, increase the number of workers
 # to be equal to the cores available.
 # Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 reminder:app

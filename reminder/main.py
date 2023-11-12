@@ -16,6 +16,13 @@ from google.auth.exceptions import InvalidValue, MalformedError
 app = Flask(__name__)
 load_dotenv()
 
+@app.route("/", methods=["GET"])
+def test() -> Response:
+    """
+    Hello World reponse for testing
+    """
+    return "Hello World"
+
 @app.route("/send_reminders", methods=["POST"])
 def send_reminders() -> Response:
     '''
