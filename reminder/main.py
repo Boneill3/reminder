@@ -12,6 +12,9 @@ from reminder import Rotation
 from twilio.request_validator import RequestValidator
 from google.auth.jwt import decode
 from google.auth.exceptions import InvalidValue, MalformedError
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from json import loads
 
 app = Flask(__name__)
 load_dotenv()
@@ -24,11 +27,51 @@ def test() -> Response:
     return "Hello World"
 
 @app.route("/send_reminders", methods=["POST"])
-def send_reminders() -> Response:
+def send_reminders() -> Response:    
     '''
     Call this from pub/sub subscription
     pass reminder key
     '''
+    # Verify that the request originates from the application.
+    if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
+        return "Invalid request", 400
+
+    # Verify that the push request originates from Cloud Pub/Sub.
+    try:
+        # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
+        bearer_token = request.headers.get("Authorization")
+        token = bearer_token.split(" ")[1]
+        #TOKENS.append(token)
+
+        # Verify and decode the JWT. `verify_oauth2_token` verifies
+        # the JWT signature, the `aud` claim, and the `exp` claim.
+        # Note: For high volume push requests, it would save some network
+        # overhead if you verify the tokens offline by downloading Google's
+        # Public Cert and decode them using the `google.auth.jwt` module;
+        # caching already seen tokens works best when a large volume of
+        # messages have prompted a single push server to handle them, in which
+        # case they would all share the same token for a limited time window.
+        claim = id_token.verify_oauth2_token(
+            token, requests.Request()
+        )
+
+        # IMPORTANT: you should validate claim details not covered by signature
+        # and audience verification above, including:
+        #   - Ensure that `claim["email"]` is equal to the expected service
+        #     account set up in the push subscription settings.
+        #   - Ensure that `claim["email_verified"]` is set to true.
+        #if claim["email"] != 
+
+        #CLAIMS.append(claim)
+    except Exception as e:
+        return f"Invalid token: {e}\n", 400
+
+    envelope = loads(request.data.decode("utf-8"))
+    payload = envelope
+    # Returning any 2xx status indicates successful receipt of the message.
+    return f"OK - {payload}", 200
+
+
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return "Unauthorized", 401
