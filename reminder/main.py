@@ -33,8 +33,8 @@ def send_reminders() -> Response:
     pass reminder key
     '''
     # Verify that the request originates from the application.
-    if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
-        return "Invalid request", 400
+    #if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
+    #    return "Invalid request", 400
 
     # Verify that the push request originates from Cloud Pub/Sub.
     try:
