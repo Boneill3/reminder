@@ -1,1 +1,1 @@
-import third_party_interfaces
+import reminder.third_party_interfaces
