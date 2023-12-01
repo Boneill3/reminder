@@ -46,9 +46,9 @@ def send_reminders() -> Response:
             token, requests.Request()
         )
 
-        if claim["email"] !=  environ.get("PUBSUB_USER") or \
-            not claim["email_verified"]:
-            logging.error(f"bad email error: { claim } {environ.get('PUBSUB_USER')} {not claim['email_verified']}")
+        if claim['email'] !=  environ.get('PUBSUB_USER') or \
+            not claim['email_verified']:
+            logging.error(f"bad email error: { claim } {environ.get('PUBSUB_USER')} {claim['email'] !=  environ.get('PUBSUB_USER')} {not claim['email_verified']}")
             return f"Unauthorized", 401
 
     except Exception:
