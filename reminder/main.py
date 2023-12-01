@@ -43,7 +43,7 @@ def send_reminders() -> Response:
 
         # Verify and decode the JWT. `verify_oauth2_token` verifies
         claim = id_token.verify_oauth2_token(
-            token, requests.Request(), request.path
+            token, requests.Request()
         )
 
         if str(claim['email']) !=  environ.get('PUBSUB_USER') or \
