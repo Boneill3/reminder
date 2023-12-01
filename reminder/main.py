@@ -37,6 +37,7 @@ def send_reminders() -> Response:
     pass reminder key
     '''
     # Verify that the request originates from the application.
+    logging.warning("DATA GOES HERE")
     logging.warning(request.args.get("token", ""))
     #if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
     #    return "Invalid request", 400
