@@ -37,8 +37,7 @@ def send_reminders() -> Response:
     pass reminder key
     '''
     # Verify that the request originates from the application.
-    logging.warning("DATA GOES HERE")
-    logging.warning(request.args.get("token", ""))
+    logging.warning(request.args)
     #if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
     #    return "Invalid request", 400
 
@@ -60,6 +59,7 @@ def send_reminders() -> Response:
         claim = id_token.verify_oauth2_token(
             token, requests.Request()
         )
+        logging.warning(claim)
 
         # IMPORTANT: you should validate claim details not covered by signature
         # and audience verification above, including:
@@ -74,6 +74,7 @@ def send_reminders() -> Response:
 
     envelope = loads(request.data.decode("utf-8"))
     payload = envelope
+    logging.warning(request.data.decode("utf-8"))
     # Returning any 2xx status indicates successful receipt of the message.
     return f"OK - {payload}", 200
 
