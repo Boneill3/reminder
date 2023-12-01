@@ -43,16 +43,14 @@ def send_reminders() -> Response:
 
         # Verify and decode the JWT. `verify_oauth2_token` verifies
         claim = id_token.verify_oauth2_token(
-            token, requests.Request()
+            token, requests.Request(), request.path
         )
 
         if str(claim['email']) !=  environ.get('PUBSUB_USER') or \
             not claim['email_verified']:
-            logging.error(f"bad email error: { claim } {environ.get('PUBSUB_USER')} {str(claim['email']) !=  str(environ.get('PUBSUB_USER'))} {not claim['email_verified']}")
             return f"Unauthorized", 401
 
     except Exception:
-        logging.error("Exception error")
         return f"Unauthorized", 401
 
     envelope = loads(request.data.decode("utf-8"))
