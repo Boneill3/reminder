@@ -60,7 +60,7 @@ def send_reminders() -> Response:
     Call this from pub/sub subscription
     pass reminder key
     '''
-    if not authenticate(request.headers.get("Authorization")):
+    if not authenticate(request.headers.get("Authorization"), request.base_url):
         return "Unauthorized", 401
     
     payload = loads(request.data.decode("utf-8"))
