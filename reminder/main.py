@@ -45,7 +45,7 @@ def send_reminders() -> Response:
         claim = id_token.verify_oauth2_token(
             token, requests.Request()
         )
-        logging.warning(claim, request.full_path)
+        logging.warning("%s , %s", claim, request.base_url)
 
         if str(claim['email']) !=  environ.get('PUBSUB_USER') or \
             not claim['email_verified']:
