@@ -46,8 +46,7 @@ def send_reminders() -> Response:
             token, requests.Request()
         )
 
-        if claim['aud'] !=  request.base_url:
-            logging.error("%s != %s", claim['aud'], request.base_url)
+        if claim['aud'] !=  request.base_url.replace("http", "https", 1):
             return "Unauthorized", 401
 
         if claim['email'] !=  environ.get('PUBSUB_USER') or \
