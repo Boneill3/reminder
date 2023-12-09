@@ -1,14 +1,14 @@
 from unittest.mock import patch, MagicMock
 from assertpy import assert_that
 from reminder.third_party_interfaces import get_users_by_last_completed_date, NULL_DATETIME, get_user_by_phone_number, update_user_response, complete_reminder, reminder_is_active, activate_reminder
-from mockfirestore import MockFirestore
+from mockfirestore import MockFirestore, Timestamp
 from datetime import datetime, timedelta
 from google.cloud.exceptions import NotFound
 
 @patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_no_dates_set_one_record(firestore_mock: MagicMock):
     mock_db = MockFirestore()
-    brian = ("+11111111111", {"name": "Brian", "last_completed": "", "last_attempted": "", "last_response": ""})
+    brian = ("+11111111111", {"name": "Brian", "last_completed": NULL_DATETIME, "last_attempted": NULL_DATETIME, "last_response": NULL_DATETIME })
     mock_db._data = {
         "123": {
             brian[0]: brian[1],

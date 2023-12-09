@@ -10,12 +10,10 @@ from flask import Flask, request, Response
 from dotenv import load_dotenv
 from reminder import Rotation
 from twilio.request_validator import RequestValidator
-from google.auth.jwt import decode
 from google.auth.exceptions import InvalidValue, MalformedError
-from google.oauth2 import id_token
-from google.auth.transport import requests
 from json import loads
 from google.cloud.logging import Client
+from authenticate import authenticate
 import logging
 
 app = Flask(__name__)
@@ -36,26 +34,9 @@ def send_reminders() -> Response:
     Call this from pub/sub subscription
     pass reminder key
     '''
-    try:
-        # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
-        bearer_token = request.headers.get("Authorization")
-        token = bearer_token.split(" ")[1]
-
-        # Verify and decode the JWT. `verify_oauth2_token` verifies
-        claim = id_token.verify_oauth2_token(
-            token, requests.Request()
-        )
-
-        if claim['aud'] !=  request.base_url.replace("http", "https", 1):
-            return "Unauthorized", 401
-
-        if claim['email'] !=  environ.get('PUBSUB_USER') or \
-            not claim['email_verified']:
-            return "Unauthorized", 401
-
-    except Exception:
+    if not authenticate(request.headers.get("Authorization")):
         return "Unauthorized", 401
-
+    
     payload = loads(request.data.decode("utf-8"))
     message:dict = payload.get("message", {})
     attributes:dict = message.get("attributes", {})
@@ -65,7 +46,7 @@ def send_reminders() -> Response:
     logging.info("Sending rotation reminders")
     for reminder in reminders:
         logging.info("Sending rotation: %s", reminder)
-        #rotation.send_reminder(reminder)
+        rotation.send_reminder(reminder)
 
     logging.warning(request.data.decode("utf-8"))
     # Returning any 2xx status indicates successful receipt of the message.

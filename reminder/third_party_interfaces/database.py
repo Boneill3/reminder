@@ -3,10 +3,16 @@ from google.cloud import firestore
 from google.cloud.firestore import DocumentSnapshot
 from google.cloud.firestore_v1.types import WriteResult
 from google.cloud.exceptions import NotFound
+from google.protobuf.timestamp_pb2 import Timestamp
 
 from datetime import datetime, timedelta
 
-NULL_DATETIME = datetime(1971, 1, 1, 0, 0, 0)
+def to_timestamp(date:datetime) -> Timestamp:
+    seconds = int(date.timestamp())
+    nanos = int(date.timestamp() % 1 * 1e9)
+    return Timestamp(seconds=seconds, nanos=nanos)
+
+NULL_DATETIME = to_timestamp(datetime(1971, 1, 1, 0, 0, 0))
 
 def get_data(name: str):
     return name
@@ -14,7 +20,7 @@ def get_data(name: str):
 def get_users_by_last_completed_date(collection:str, limit:int=None) -> Generator[DocumentSnapshot, Any, None]:
     before_today = datetime.now() - timedelta(days=1)
     db = firestore.Client()
-    doc = db.collection(collection).where("last_attempted", "<=", before_today).order_by("last_completed").limit(limit).stream()
+    doc = db.collection(collection).where("last_attempted", "<=", to_timestamp(before_today)).order_by("last_completed").limit(limit).stream()
     return doc
 
 def get_user_by_phone_number(collection:str, phone_number:str) -> DocumentSnapshot:
