@@ -46,7 +46,7 @@ def send_reminders() -> Response:
             token, requests.Request()
         )
 
-        if claim['email'] !=  request.base_url:
+        if claim['aud'] !=  request.base_url:
             return "Unauthorized", 401
 
         if claim['email'] !=  environ.get('PUBSUB_USER') or \
@@ -56,7 +56,8 @@ def send_reminders() -> Response:
     except Exception:
         return "Unauthorized", 401
 
-    message = loads(request.data.decode("utf-8"))
+    payload = loads(request.data.decode("utf-8"))
+    message:dict = payload.get("message", {})
     attributes:dict = message.get("attributes", {})
     reminders = attributes.values()
 
