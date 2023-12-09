@@ -14,7 +14,7 @@ def get_data(name: str):
 def get_users_by_last_completed_date(collection:str, limit:int=None) -> Generator[DocumentSnapshot, Any, None]:
     before_today = datetime.now() - timedelta(days=1)
     db = firestore.Client()
-    doc = db.collection(collection).where("last_attempted", "<=", before_today).order_by("last_completed").limit(limit).stream()
+    doc = db.collection(collection).order_by("last_attempted").where("last_attempted", "<=", before_today).order_by("last_completed").limit(limit).stream()
     return doc
 
 def get_user_by_phone_number(collection:str, phone_number:str) -> DocumentSnapshot:
