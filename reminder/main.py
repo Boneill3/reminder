@@ -45,9 +45,11 @@ def send_reminders() -> Response:
         claim = id_token.verify_oauth2_token(
             token, requests.Request()
         )
-        logging.warning("%s , %s", claim, request.base_url)
 
-        if str(claim['email']) !=  environ.get('PUBSUB_USER') or \
+        if claim['email'] !=  request.base_url:
+            return "Unauthorized", 401
+
+        if claim['email'] !=  environ.get('PUBSUB_USER') or \
             not claim['email_verified']:
             return "Unauthorized", 401
 
