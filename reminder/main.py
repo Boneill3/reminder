@@ -13,13 +13,39 @@ from twilio.request_validator import RequestValidator
 from google.auth.exceptions import InvalidValue, MalformedError
 from json import loads
 from google.cloud.logging import Client
-from authenticate import authenticate
 import logging
+
+from google.auth.jwt import decode
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 app = Flask(__name__)
 load_dotenv()
 client = Client()
 client.setup_logging()
+
+def authenticate(bearer_token:str, base_url:str) -> bool:
+    try:
+        token = bearer_token.split(" ")[1]
+
+        # replace with decode?
+
+        # Verify and decode the JWT. `verify_oauth2_token` verifies
+        claim = id_token.verify_oauth2_token(
+            token, requests.Request()
+        )
+
+        if claim['aud'] !=  base_url.replace("http://", "https://", 1):
+            return False
+
+        if claim['email'] !=  environ.get('PUBSUB_USER') or \
+            not claim['email_verified']:
+            return False
+
+    except Exception:
+        return False
+    
+    return True
 
 @app.route("/", methods=["GET"])
 def test() -> Response:
