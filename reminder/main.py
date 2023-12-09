@@ -45,39 +45,28 @@ def send_reminders() -> Response:
         claim = id_token.verify_oauth2_token(
             token, requests.Request()
         )
+        logging.warning(claim, request.full_path)
 
         if str(claim['email']) !=  environ.get('PUBSUB_USER') or \
             not claim['email_verified']:
-            return f"Unauthorized", 401
+            return "Unauthorized", 401
 
     except Exception:
-        return f"Unauthorized", 401
+        return "Unauthorized", 401
 
-    envelope = loads(request.data.decode("utf-8"))
-    payload = envelope
+    message = loads(request.data.decode("utf-8"))
+    attributes:dict = message.get("attributes", {})
+    reminders = attributes.values()
+
+    rotation = Rotation()
+    logging.info("Sending rotation reminders")
+    for reminder in reminders:
+        logging.info("Sending rotation: %s", reminder)
+        rotation.send_reminder(reminder)
+
     logging.warning(request.data.decode("utf-8"))
     # Returning any 2xx status indicates successful receipt of the message.
-    return f"OK - {payload}", 200
-
-
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        return "Unauthorized", 401
-
-    # split the auth type and value from the header.
-    auth_type, creds = auth_header.split(" ", 1)
-    if auth_type.lower() != "bearer":
-        return "Unauthorized", 401
-
-    try:
-        decode(creds)
-    except (InvalidValue, MalformedError):
-        return "Unauthorized", 401
-
-    reminder = request.json.get("reminder")
-    rotation = Rotation()
-    rotation.send_reminder(reminder)
-    return {}
+    return "OK", 200
 
 @app.route("/receive_sms", methods=["POST"])
 def receive_sms() -> Response:
