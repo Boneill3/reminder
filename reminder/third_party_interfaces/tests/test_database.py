@@ -8,7 +8,7 @@ from google.cloud.exceptions import NotFound
 @patch("reminder.third_party_interfaces.database.firestore")
 def test_get_record_when_no_dates_set_one_record(firestore_mock: MagicMock):
     mock_db = MockFirestore()
-    brian = ("+11111111111", {"name": "Brian", "last_completed": NULL_DATETIME, "last_attempted": NULL_DATETIME, "last_response": ""})
+    brian = ("+11111111111", {"name": "Brian", "last_completed": "", "last_attempted": "", "last_response": ""})
     mock_db._data = {
         "123": {
             brian[0]: brian[1],

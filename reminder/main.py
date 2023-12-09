@@ -65,7 +65,7 @@ def send_reminders() -> Response:
     logging.info("Sending rotation reminders")
     for reminder in reminders:
         logging.info("Sending rotation: %s", reminder)
-        rotation.send_reminder(reminder)
+        #rotation.send_reminder(reminder)
 
     logging.warning(request.data.decode("utf-8"))
     # Returning any 2xx status indicates successful receipt of the message.
