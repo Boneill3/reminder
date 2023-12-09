@@ -6,7 +6,7 @@ This is the main flask program. Eventually, this should just call
 other modules and handle errors only.
 """
 from os import environ
-from flask import Flask, request, Response
+from flask import Flask, request, Response, send_from_directory
 from dotenv import load_dotenv
 from reminder import Rotation
 from twilio.request_validator import RequestValidator
@@ -46,6 +46,13 @@ def authenticate(bearer_token:str, base_url:str) -> bool:
         return False
     
     return True
+
+@app.route("/opt-in", methods=["GET"])
+def opt_in() -> Response:
+    """
+    Send opt-in image for 10DL compliance
+    """
+    return send_from_directory("files", "opt-in.png")
 
 @app.route("/", methods=["GET"])
 def test() -> Response:
