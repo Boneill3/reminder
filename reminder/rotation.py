@@ -42,8 +42,8 @@ class Rotation:
         """
         This function processes the response received from the user
         """
-        user_record = list(get_user_by_phone_number(collection, phone_number))
-        if len(user_record) == 0:
+        user_record = get_user_by_phone_number(collection, phone_number)
+        if not user_record.exists:
             raise KeyError("User not found")
 
         positive_responses = ["y","yes"]
