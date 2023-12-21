@@ -37,7 +37,7 @@ def reminder_is_active(collection: str) -> bool:
     db = firestore.Client()
     reminder = db.collection("reminders").document(collection).get()
     if not reminder.exists:
-        raise NotFound("reminder collection not found")
+        raise NotFound(f"reminder collection {collection} not found")
 
     return reminder.to_dict().get("status") == "active"
 
