@@ -5,13 +5,20 @@ least recently
 """
 from .third_party_interfaces import get_data, get_users_by_last_completed_date, send_sms
 from .third_party_interfaces import get_user_by_phone_number, update_user_response
-from .third_party_interfaces import complete_reminder, reminder_is_active
+from .third_party_interfaces import complete_reminder, reminder_is_active, activate_reminder
 
 class Rotation:
     """
     This class contains the functions necessary for the application to
     rotate between members of a household when sending reminders.
     """
+    def __init__(self, collection:str, status:str) -> None:
+        self.collection = collection
+
+        if status == "new":
+            activate_reminder(collection)
+
+
     def rotation_test(self) -> str:
         """
         This function tests that the database interactions are working properly in the Rotation class

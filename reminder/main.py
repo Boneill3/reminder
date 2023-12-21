@@ -73,13 +73,14 @@ def send_reminders() -> Response:
     payload = loads(request.data.decode("utf-8"))
     message:dict = payload.get("message", {})
     attributes:dict = message.get("attributes", {})
-    reminders = attributes.values()
 
-    rotation = Rotation()
+    collection = attributes.get("collection")
+    status = attributes.get("status")
+
+    rotation = Rotation(collection, status)
     logging.info("Sending rotation reminders")
-    for reminder in reminders:
-        logging.info("Sending rotation: %s", reminder)
-        rotation.send_reminder(reminder)
+    logging.info("Sending rotation: %s", collection)
+    rotation.send_reminder(collection)
 
     logging.warning(request.data.decode("utf-8"))
     # Returning any 2xx status indicates successful receipt of the message.
