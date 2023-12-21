@@ -107,7 +107,7 @@ def receive_sms() -> Response:
     # For now hardcode to single collection
     collection = "trash-reminder"
 
-    rotation = Rotation()
+    rotation = Rotation(collection)
     rotation.receive(collection, phone_number, message_body)
     
     return {}

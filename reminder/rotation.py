@@ -12,7 +12,7 @@ class Rotation:
     This class contains the functions necessary for the application to
     rotate between members of a household when sending reminders.
     """
-    def __init__(self, collection:str, status:str) -> None:
+    def __init__(self, collection:str, status:str = None) -> None:
         self.collection = collection
 
         if status == "new":
