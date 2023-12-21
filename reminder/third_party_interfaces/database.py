@@ -25,13 +25,18 @@ def get_user_by_phone_number(collection:str, phone_number:str) -> DocumentSnapsh
     doc = db.collection(collection).document(phone_number).get()
     return doc
 
+def update_user_attemped(collection:str, phone_number:str) -> None:
+    db = firestore.Client()
+    db.collection(collection).document(phone_number).update({"last_attempted": datetime.now()})
+
 def update_user_response(collection:str, phone_number:str, message_body:str) -> None:
     db = firestore.Client()
     db.collection(collection).document(phone_number).update({"last_response": message_body})
 
-def complete_reminder(collection:str) -> None:
+def complete_reminder(collection:str, phone_number:str) -> None:
     db = firestore.Client()
     db.collection("reminders").document(collection).update({"status": "inactive"})
+    db.collection(collection).document(phone_number).update({"last_completed": datetime.now()})
 
 def reminder_is_active(collection: str) -> bool:
     db = firestore.Client()

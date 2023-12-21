@@ -5,7 +5,7 @@ least recently
 """
 from .third_party_interfaces import get_data, get_users_by_last_completed_date, send_sms
 from .third_party_interfaces import get_user_by_phone_number, update_user_response
-from .third_party_interfaces import complete_reminder, reminder_is_active, activate_reminder
+from .third_party_interfaces import complete_reminder, reminder_is_active, activate_reminder, update_user_attemped
 
 class Rotation:
     """
@@ -44,6 +44,7 @@ class Rotation:
         name = user.get("name")
         message = f"Hi {name}, it's your turn to take out the trash tonight! Can you pick it up tonight? Please respond with Yes or No."
         send_sms(phone_number, message)
+        update_user_attemped(collection, phone_number)
     
     def receive(self, collection:str, phone_number:str, message_body:str):
         """
@@ -67,6 +68,6 @@ class Rotation:
         send_sms(phone_number, "Got it! Thanks!")
 
         if message_body.lower() in positive_responses:
-            complete_reminder(collection)
+            complete_reminder(collection, phone_number)
         else:
             self.send_reminder(collection)
