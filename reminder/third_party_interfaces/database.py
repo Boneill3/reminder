@@ -25,7 +25,11 @@ def get_user_by_phone_number(collection:str, phone_number:str) -> DocumentSnapsh
     doc = db.collection(collection).document(phone_number).get()
     return doc
 
-def update_user_attemped(collection:str, phone_number:str) -> None:
+def get_all_users_by_collection(collection:str) -> Generator[DocumentSnapshot, Any, None]:
+    db = firestore.Client()
+    return db.collection(collection).stream()
+
+def update_user_attempted(collection:str, phone_number:str) -> None:
     db = firestore.Client()
     db.collection(collection).document(phone_number).update({"last_attempted": datetime.now()})
 

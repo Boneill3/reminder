@@ -5,7 +5,7 @@ least recently
 """
 from .third_party_interfaces import get_data, get_users_by_last_completed_date, send_sms
 from .third_party_interfaces import get_user_by_phone_number, update_user_response
-from .third_party_interfaces import complete_reminder, reminder_is_active, activate_reminder, update_user_attemped
+from .third_party_interfaces import complete_reminder, reminder_is_active, activate_reminder, update_user_attempted, get_all_users_by_collection
 
 class Rotation:
     """
@@ -32,11 +32,12 @@ class Rotation:
         '''
         user_record = list(get_users_by_last_completed_date(collection, 1))
         if len(user_record) == 0:
-            # TODO: Change to message all?
-            #user_records = get_all_users_by_collection(collection)
-            #for user in user_records:
-            #send_sms(user.id, failed_message)
-            raise KeyError("User not found")
+            user_records = get_all_users_by_collection(collection)
+            for user in user_records:
+                name = user.to_dict().get("name")
+                failed_message = f"Hi {name}, NOBODY is able to take out the trash tonight! 🤷‍♂️ Figure it out humans!"
+                send_sms(user.id, failed_message)
+            return
 
         phone_number = user_record[0].id 
         user = user_record[0].to_dict()
@@ -44,7 +45,7 @@ class Rotation:
         name = user.get("name")
         message = f"Hi {name}, it's your turn to take out the trash tonight! Can you pick it up tonight? Please respond with Yes or No."
         send_sms(phone_number, message)
-        update_user_attemped(collection, phone_number)
+        update_user_attempted(collection, phone_number)
     
     def receive(self, collection:str, phone_number:str, message_body:str):
         """
