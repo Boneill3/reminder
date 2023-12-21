@@ -35,7 +35,7 @@ class Rotation:
             user_records = get_all_users_by_collection(collection)
             for user in user_records:
                 name = user.to_dict().get("name")
-                failed_message = f"Hi {name}, NOBODY is able to take out the trash tonight! 🤷‍♂️ Figure it out humans!"
+                failed_message = f"Hi {name}, NOBODY is able to take out the trash tonight! 🤷‍♂️ Figure it out, humans!"
                 send_sms(user.id, failed_message)
             return
 
