@@ -30,6 +30,9 @@ class Rotation:
         Send the reminder to next person on the rotation
         Assumes that the reminder is scheduled to run today and not completed
         '''
+        if not reminder_is_active(collection):
+            return
+
         user_record = list(get_users_by_last_completed_date(collection, 1))
         if len(user_record) == 0:
             user_records = get_all_users_by_collection(collection)

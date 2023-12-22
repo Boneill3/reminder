@@ -21,8 +21,10 @@ from google.auth.transport import requests
 
 app = Flask(__name__)
 load_dotenv()
-client = Client()
-client.setup_logging()
+
+if environ.get("CLOUD_LOGGING", "False") == "True":
+    client = Client()
+    client.setup_logging()
 
 def authenticate(bearer_token:str, base_url:str) -> bool:
     try:
