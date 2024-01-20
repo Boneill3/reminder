@@ -3,3 +3,4 @@ gunicorn
 twilio
 python-dotenv
 google-cloud-firestore
+google-cloud-logging

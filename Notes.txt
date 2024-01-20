@@ -1,4 +1,0 @@
-TODO:
-Move to install reminder instead of copy files
-Look up test credentials information (should be in the settings page)
-Move cloud function to github source
