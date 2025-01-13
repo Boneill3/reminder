@@ -84,7 +84,9 @@ class TestSendReminder:
 @patch("reminder.rotation.send_sms")
 class TestRecieve:
 
+    @patch("reminder.rotation.get_all_users_by_collection")
     def test_recieve_positive_response(self,
+                                    get_all_users_by_collection:MagicMock,
                                     send_sms:MagicMock,
                                     get_user_by_phone_number:MagicMock,
                                     update_user_response:MagicMock,
@@ -99,13 +101,20 @@ class TestRecieve:
         message_body = "YES"
         user_record = MagicMock()
         user_record.exists = True
+        user_record.id = phone_number
+        user_record.to_dict.return_value = { "name": "A", }
         get_user_by_phone_number.return_value = user_record
         reminder_is_active.return_value = True
+        user_b = MagicMock()
+        user_b.id = "+5551234568"
+        user_b.to_dict.return_value = { "name": "B", }
+        get_all_users_by_collection.return_value = islice([user_record, user_b], None)
 
         rotation = Rotation("", "")
         rotation.receive(collection, phone_number, message_body)
 
-        send_sms.assert_called_once_with(phone_number, "Got it! Thanks!")
+        send_sms.assert_has_calls([call(phone_number, "Got it! Thanks!"),call(user_b.id,
+                                    "A responded that they will take out the trash tonight!")]) 
         update_user_response.assert_called_once_with(collection, phone_number, message_body)
         complete_reminder.assert_called_once_with(collection, phone_number)
 
