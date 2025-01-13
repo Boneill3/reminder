@@ -70,5 +70,11 @@ class Rotation:
 
         if message_body.lower() in positive_responses:
             complete_reminder(collection, phone_number)
+            name = user_record.to_dict().get("name")
+            users = get_all_users_by_collection(collection)
+            for user in users:
+                if user.id == phone_number:
+                    continue
+                send_sms(user.id, f"{name} responded that they will take out the trash tonight!")
         else:
             self.send_reminder(collection)
